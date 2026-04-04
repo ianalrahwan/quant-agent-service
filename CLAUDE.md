@@ -84,6 +84,8 @@ quant-agent-service/
 ## Code Standards
 
 - Python 3.12+, type hints everywhere, Pydantic v2 for all I/O
+- UV for dependency management
+- LangGraph for node-based context management
 - Async by default (FastAPI + httpx + asyncio)
 - No print statements — use structlog
 - Tests: pytest + pytest-asyncio + httpx for API tests
