@@ -1,0 +1,9 @@
+{
+  "rootDirectory": "frontend",
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/scanner/route.ts": {
+      "maxDuration": 120
+    }
+  }
+}
