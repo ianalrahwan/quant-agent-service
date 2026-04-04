@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bb-black: #000000;
+  --color-bb-darkgray: #0a0a0a;
+  --color-bb-gray: #333333;
+  --color-bb-midgray: #1a1a1a;
+  --color-bb-orange: #fb8b1e;
+  --color-bb-amber: #ff9900;
+  --color-bb-green: #4af6c3;
+  --color-bb-red: #ff433d;
+  --color-bb-blue: #0068ff;
+  --color-bb-white: #cccccc;
+  --color-bb-brightwhite: #ffffff;
+
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n5iQ.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/-F6qfjptAgt5VM-kVkqdyU8n3oQI.woff2")
+    format("woff2");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #000000;
+  color: #fb8b1e;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* No border-radius anywhere — Bloomberg is all sharp rectangles */
+* {
+  border-radius: 0 !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #fb8b1e;
+}
+
+/* Blinking cursor for command line */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Ticker tape marquee */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-scroll {
+  animation: marquee 30s linear infinite;
+}
+
+/* Selection styling */
+::selection {
+  background: #0068ff;
+  color: #ffffff;
+}
