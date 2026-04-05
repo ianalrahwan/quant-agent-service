@@ -1,46 +1,17 @@
 # Quant Agent Service
 
-## Workflow Methodology
+## Workflow
 
-MANDATORY: Follow this workflow for ALL non-trivial work. Never skip phases.
-
-### Phase 1: BRAINSTORM (before any code)
-- When the user describes a feature or task, DO NOT write code immediately
-- Enter Plan Mode (`/plan`) and produce a design document covering:
-  - What problem this solves
-  - Architecture: which files, which patterns, how data flows
-  - Edge cases and failure modes
-  - What we're NOT building (scope boundaries)
-- Ask at least one clarifying question before proceeding
-- Exit plan mode only after user approves the design
-
-### Phase 2: PLAN (break into tasks)
-- Create tasks using TaskCreate for every piece of work
-- Each task should be completable in 2-5 minutes
-- Tasks must include: exact file path, what to write, how to verify
-- Set dependencies between tasks (don't start task 3 before task 2 is done)
-- Show the full task list to the user before starting
-
-### Phase 3: EXECUTE (one task at a time)
-- Work through tasks sequentially
-- Mark each task `in_progress` when starting, `completed` when done
-- After completing each task, verify it works (run tests, check imports, etc.)
-- If a task reveals something unexpected, STOP and discuss before continuing
-- Never batch multiple tasks silently — the user should see progress
-
-### Phase 4: TEST (verify everything)
-- Write tests BEFORE or ALONGSIDE implementation (TDD when possible)
-- Run all tests after each task completes
-- If tests fail, fix before moving to next task
-- Integration tests after all unit tests pass
-
-### Phase 5: REVIEW (before committing)
-- Run `/simplify` or equivalent review on all changed files
-- Check for: security issues, type safety, error handling, unnecessary complexity
-- Remove any code that was added "just in case"
-- Verify the implementation matches the Phase 1 design
+- For non-trivial work, use the superpowers plugin workflow (brainstorming, planning, execution)
+- Do NOT write code immediately for new features — brainstorm and plan first
+- Ask clarifying questions before proceeding
+- Track tasks and show progress to the user
+- Verify after each task (run tests, check imports, etc.)
+- Run `/simplify` before committing
 
 ## Project Architecture
+
+- This is the goal end state. We are still working on a front end to iterate with that shows a terminal like 2000s Bloomberg
 
 ```
 quant-agent-service/
