@@ -1,0 +1,4 @@
+[dependency-groups]
+dev = [
+    "langgraph>=1.1.6",
+]
