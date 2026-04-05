@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { HeaderBar } from "@/components/bloomberg/HeaderBar";
@@ -14,6 +14,8 @@ import { VolSurface } from "@/components/detail/VolSurface";
 import { KurtosisChart } from "@/components/detail/KurtosisChart";
 import { MacroIVChart } from "@/components/detail/MacroIVChart";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { useAgentAnalysis } from "@/hooks/useAgentAnalysis";
+import { AgentPanel } from "@/components/detail/AgentPanel";
 import type {
   QuoteData,
   OptionsChainData,
@@ -21,6 +23,7 @@ import type {
   ScanResult,
   HistoricalBar,
 } from "@/lib/types";
+import type { ScannerSignals } from "@/lib/agent-types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -48,6 +51,22 @@ export default function TickerDetailPage({
 
   const scanResult = scanResults?.find((r) => r.symbol === symbol);
 
+  const { state: agentState, bearState, startAnalysis, resumeCheckpoint, reset } = useAgentAnalysis();
+
+  const handleStartAnalysis = useCallback(() => {
+    if (!scanResult) return;
+    const signals: ScannerSignals = {
+      iv_percentile: scanResult.criteria.ivPercentile?.score ?? 0,
+      skew_kurtosis: scanResult.criteria.skewKurtosis?.score ?? 0,
+      dealer_gamma: scanResult.criteria.dealerGamma?.score ?? 0,
+      term_structure: scanResult.criteria.termStructure?.score ?? 0,
+      vanna: scanResult.criteria.vanna?.score ?? 0,
+      charm: scanResult.criteria.charm?.score ?? 0,
+      composite: scanResult.compositeScore ?? 0,
+    };
+    startAnalysis(symbol, { scanner_signals: signals });
+  }, [scanResult, symbol, startAnalysis]);
+
   const navigateToDetail = useCallback(
     (sym: string) => router.push(`/ticker/${sym}`),
     [router]
@@ -63,6 +82,17 @@ export default function TickerDetailPage({
   };
 
   useKeyboard({ onEscape: () => router.push("/") });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "F5") {
+        e.preventDefault();
+        handleStartAnalysis();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleStartAnalysis]);
 
   const spotPrice = quote?.price ?? 0;
   const isMarketOpen = (() => {
@@ -233,11 +263,25 @@ export default function TickerDetailPage({
               )}
             </Panel>
           </div>
+
+          {/* Agent Analysis */}
+          <div className="border-t border-bb-gray">
+            <Panel title="Agent Analysis">
+              <AgentPanel
+                state={agentState}
+                bearState={bearState}
+                onStart={handleStartAnalysis}
+                onResume={resumeCheckpoint}
+                onReset={reset}
+              />
+            </Panel>
+          </div>
         </div>
       </div>
 
       <FunctionBar
         keys={[
+          { key: "F5", label: "ANALYZE", action: handleStartAnalysis },
           { key: "ESC", label: "SCANNER", action: () => router.push("/") },
         ]}
       />
