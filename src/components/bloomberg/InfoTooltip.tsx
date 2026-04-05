@@ -28,7 +28,7 @@ export function InfoTooltip({
             className="fixed inset-0 z-40"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 top-5 z-50 w-[280px] bg-bb-darkgray border border-bb-gray p-3 text-[11px] leading-relaxed shadow-lg">
+          <div className="absolute left-0 top-5 z-50 w-[280px] bg-bb-darkgray border border-bb-gray p-3 text-[11px] leading-relaxed shadow-lg normal-case tracking-normal">
             <div className="text-bb-white italic">&ldquo;{quote}&rdquo;</div>
             <div className="text-bb-amber mt-2 text-[10px]">{attribution}</div>
             <button

@@ -28,6 +28,8 @@ export default function ScannerPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [sectorFilter, setSectorFilter] = useState("all");
   const [minScore, setMinScore] = useState(0);
+  const [termFilter, setTermFilter] = useState("all");
+  const [signalFilter, setSignalFilter] = useState("all");
   const [tickerInput, setTickerInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,9 +59,24 @@ export default function ScannerPage() {
         }
       }
       if (r.compositeScore * 100 < minScore) return false;
+      // Term structure filter: backwardation = score > 0.5, contango = score <= 0.5
+      if (termFilter === "backwardation" && r.criteria.termStructure.score <= 0.5) return false;
+      if (termFilter === "contango" && r.criteria.termStructure.score > 0.5) return false;
+      // Signal filter
+      if (signalFilter === "strong") {
+        if (r.criteria.ivPercentile.signal !== "strong" &&
+            r.criteria.dealerGamma.signal !== "strong" &&
+            r.criteria.termStructure.signal !== "strong") return false;
+      }
+      if (signalFilter === "moderate") {
+        const hasSignal = Object.values(r.criteria).some(
+          (c) => c.signal === "strong" || c.signal === "moderate"
+        );
+        if (!hasSignal) return false;
+      }
       return true;
     });
-  }, [results, sectorFilter, minScore]);
+  }, [results, sectorFilter, minScore, termFilter, signalFilter]);
 
   const selectedResult = filtered[selectedIndex] ?? null;
 
@@ -124,13 +141,13 @@ export default function ScannerPage() {
               value={tickerInput}
               onChange={(e) => setTickerInput(e.target.value.toUpperCase())}
               placeholder="SPY, AAPL, GLD..."
-              className="w-full bg-bb-black border border-bb-gray text-bb-brightwhite text-[15px] font-mono font-bold px-3 py-2 outline-none focus:border-bb-amber placeholder:text-bb-gray placeholder:font-normal"
+              className="w-full bg-bb-black border border-bb-amber text-bb-brightwhite text-[15px] font-mono font-bold px-3 py-2 outline-none focus:border-bb-brightwhite placeholder:text-bb-white/50 placeholder:font-normal"
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-bb-gray text-[10px]">
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-bb-amber text-[11px] font-bold">
               ENTER ⏎
             </span>
           </div>
-          <span className="text-bb-gray text-[11px]">
+          <span className="text-bb-white text-[12px]">
             Type any ticker symbol and press Enter for detailed vol analysis
           </span>
         </form>
@@ -142,6 +159,10 @@ export default function ScannerPage() {
           onSectorChange={setSectorFilter}
           minScore={minScore}
           onMinScoreChange={setMinScore}
+          termFilter={termFilter}
+          onTermFilterChange={setTermFilter}
+          signalFilter={signalFilter}
+          onSignalFilterChange={setSignalFilter}
         />
       )}
 

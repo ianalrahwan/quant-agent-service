@@ -18,7 +18,7 @@ const columns: Column<ScanResult>[] = [
     width: "3ch",
     align: "right",
     render: (_row, i) => (
-      <span className="text-bb-gray">{i + 1}</span>
+      <span className="text-bb-white font-bold">{i + 1}</span>
     ),
   },
   {

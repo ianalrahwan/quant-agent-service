@@ -8,7 +8,7 @@ interface VolSurfaceProps {
 }
 
 export function VolSurface({ chain, spotPrice }: VolSurfaceProps) {
-  const expirations = Object.keys(chain.chains).slice(0, 3);
+  const expirations = Object.keys(chain.chains).slice(0, 7);
   if (expirations.length === 0) {
     return <div className="text-bb-gray text-[11px]">No surface data</div>;
   }
@@ -49,22 +49,22 @@ export function VolSurface({ chain, spotPrice }: VolSurfaceProps) {
 
   function ivColor(iv: number): string {
     const t = (iv - minIV) / range;
-    if (t < 0.33) return "bg-bb-blue/40 text-bb-blue";
-    if (t < 0.66) return "bg-bb-amber/30 text-bb-amber";
-    return "bg-bb-red/30 text-bb-red";
+    if (t < 0.33) return "bg-bb-blue/50 text-bb-brightwhite";
+    if (t < 0.66) return "bg-bb-amber/40 text-bb-brightwhite";
+    return "bg-bb-red/40 text-bb-brightwhite";
   }
 
   return (
     <div className="overflow-auto">
-      <div className="text-[10px] text-bb-gray mb-1">
+      <div className="text-[12px] text-bb-white mb-2">
         IV Surface — Call IV by Strike x Expiry
       </div>
-      <table className="text-[10px] border-collapse">
+      <table className="text-[12px] border-collapse">
         <thead>
           <tr>
-            <th className="text-bb-amber px-1 text-right">Strike</th>
+            <th className="text-bb-amber px-2 py-1 text-right font-bold">Strike</th>
             {expirations.map((exp) => (
-              <th key={exp} className="text-bb-amber px-1 text-center">
+              <th key={exp} className="text-bb-amber px-2 py-1 text-center font-bold">
                 {exp.slice(5)} {/* MM-DD */}
               </th>
             ))}
@@ -81,13 +81,13 @@ export function VolSurface({ chain, spotPrice }: VolSurfaceProps) {
                   : ""
               }
             >
-              <td className="text-bb-white px-1 text-right tabular-nums">
+              <td className="text-bb-white px-2 py-1 text-right tabular-nums font-bold">
                 {strike.toFixed(0)}
               </td>
               {matrix[i].map((iv, j) => (
                 <td
                   key={j}
-                  className={`px-1 text-center tabular-nums ${iv !== null ? ivColor(iv) : "text-bb-gray"}`}
+                  className={`px-2 py-1 text-center tabular-nums font-bold ${iv !== null ? ivColor(iv) : "text-bb-white/30"}`}
                 >
                   {iv !== null ? (iv * 100).toFixed(1) : "—"}
                 </td>

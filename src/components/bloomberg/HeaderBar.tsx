@@ -51,7 +51,7 @@ export function HeaderBar({ vixLevel, marketOpen, dataTimestamp }: HeaderBarProp
           {marketOpen ? "● MKT OPEN" : "● MKT CLOSED"}
         </span>
         {!marketOpen && dataTimestamp && (
-          <span className="text-bb-gray text-[10px]">
+          <span className="text-bb-white text-[11px]">
             DATA AS OF{" "}
             {new Date(dataTimestamp).toLocaleString("en-US", {
               month: "short",

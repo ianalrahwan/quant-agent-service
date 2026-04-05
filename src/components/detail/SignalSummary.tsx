@@ -28,7 +28,7 @@ const CRITERIA_INFO: Array<{
   {
     key: "skewKurtosis",
     name: "SKEW & KURTOSIS",
-    description: "Put skew steepness + realized tail fatness",
+    description: "Steep skew + fat tails = tail risk priced in. High kurtosis + low skew = underpriced.",
     quote:
       "The entire edifice of modern finance is built on the assumption that returns are normally distributed. They are not. The real world has fat tails — events that models say should happen once in ten thousand years happen every few years.",
     attribution: "— Nassim Taleb",
@@ -95,8 +95,8 @@ export function SignalSummary({
             <div className="flex items-center gap-2 mt-1">
               <ScoreBar score={c.score} width={100} />
             </div>
-            <div className="text-bb-white text-[10px] mt-1">{c.label}</div>
-            <div className="text-bb-gray text-[10px]">{description}</div>
+            <div className="text-bb-white text-[11px] mt-1">{c.label}</div>
+            <div className="text-bb-white/60 text-[11px]">{description}</div>
           </div>
         );
       })}

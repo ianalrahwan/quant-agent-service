@@ -54,9 +54,9 @@ export function SkewChart({ calls, puts, spotPrice }: SkewChartProps) {
 
   return (
     <div>
-      <div className="text-[10px] text-bb-gray mb-1">
-        IV by Strike — <span className="text-bb-green">Calls</span> /{" "}
-        <span className="text-bb-red">Puts</span>
+      <div className="text-[12px] text-bb-white mb-1">
+        IV by Strike — <span className="text-bb-green font-bold">Calls</span> /{" "}
+        <span className="text-bb-red font-bold">Puts</span>
       </div>
       <svg width={chartW} height={chartH + 25} className="font-mono">
         {/* Spot line */}
@@ -65,10 +65,10 @@ export function SkewChart({ calls, puts, spotPrice }: SkewChartProps) {
           y1={0}
           x2={spotX}
           y2={chartH}
-          stroke="#333333"
+          stroke="#fb8b1e"
           strokeDasharray="4,4"
         />
-        <text x={spotX} y={chartH + 16} textAnchor="middle" fill="#666" fontSize="11">
+        <text x={spotX} y={chartH + 16} textAnchor="middle" fill="#fb8b1e" fontSize="12" fontWeight="bold">
           ATM
         </text>
 
@@ -93,10 +93,10 @@ export function SkewChart({ calls, puts, spotPrice }: SkewChartProps) {
         )}
 
         {/* Axis labels */}
-        <text x={0} y={chartH + 16} fill="#666" fontSize="11">
+        <text x={0} y={chartH + 16} fill="#cccccc" fontSize="11">
           {strikeMin.toFixed(0)}
         </text>
-        <text x={chartW} y={chartH + 16} textAnchor="end" fill="#666" fontSize="11">
+        <text x={chartW} y={chartH + 16} textAnchor="end" fill="#cccccc" fontSize="11">
           {strikeMax.toFixed(0)}
         </text>
       </svg>
