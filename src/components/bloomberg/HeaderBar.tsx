@@ -32,7 +32,7 @@ export function HeaderBar({ vixLevel, marketOpen, dataTimestamp }: HeaderBarProp
     <div className="flex items-center justify-between border-b border-bb-gray px-3 py-1 bg-bb-darkgray text-[12px]">
       <div className="flex items-center gap-4">
         <span className="text-bb-amber font-bold tracking-widest text-[14px]">
-          RAHWAN-BEAR-SWAN BROWSER
+          BEAR-SWAN BROWSER
         </span>
         <span className="text-bb-white">TERMINAL v1.0</span>
       </div>

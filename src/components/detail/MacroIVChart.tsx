@@ -60,9 +60,9 @@ function getForwardIVProjection(
   return result;
 }
 
-const MARGIN = { top: 20, right: 55, bottom: 30, left: 50 };
+const MARGIN = { top: 15, right: 50, bottom: 25, left: 45 };
 const CHART_W = 700;
-const CHART_H = 250;
+const CHART_H = 180;
 const INNER_W = CHART_W - MARGIN.left - MARGIN.right;
 const INNER_H = CHART_H - MARGIN.top - MARGIN.bottom;
 

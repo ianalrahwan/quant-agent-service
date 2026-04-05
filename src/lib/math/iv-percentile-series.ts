@@ -11,16 +11,19 @@ export function computeIVPercentileSeries(
   history: HistoricalBar[]
 ): IVPercentilePoint[] {
   const prices = history.map((b) => b.close);
-  const vols = rollingRealizedVol(prices, 30);
+  const vols = rollingRealizedVol(prices, 20);
 
-  const lookback = 252;
+  // Use all available vol history as the ranking distribution.
+  // For each day, rank against all vol values up to that point.
   const result: IVPercentilePoint[] = [];
+  const minLookback = 40; // need at least 40 data points for meaningful percentile
 
-  for (let i = lookback; i < vols.length; i++) {
+  for (let i = minLookback; i < vols.length; i++) {
     const currentVol = vols[i];
-    const historicalWindow = vols.slice(i - lookback, i);
+    const historicalWindow = vols.slice(0, i);
     const pctl = percentile(currentVol, historicalWindow);
-    const historyIndex = i + 30;
+    // vols[i] corresponds to history[i + 20] (20-day vol window offset)
+    const historyIndex = i + 20;
     if (historyIndex < history.length) {
       result.push({
         date: history[historyIndex].date,

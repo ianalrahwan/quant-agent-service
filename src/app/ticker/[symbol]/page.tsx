@@ -137,10 +137,79 @@ export default function TickerDetailPage({
           </Panel>
         </div>
 
-        {/* Right: Visualizations */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top row: Macro IV Chart (taller, fixed height) */}
-          <div className="border-b border-bb-gray overflow-auto" style={{ minHeight: "280px" }}>
+        {/* Right: Visualizations — single scrollable column */}
+        <div className="flex-1 overflow-auto">
+          {/* Term Structure + Skew */}
+          <div className="flex">
+            <div className="flex-1 border-r border-b border-bb-gray">
+              <Panel title={
+                <>
+                  <span>{["SPY","QQQ","IWM","DIA"].includes(symbol) ? "VIX" : symbol} Term Structure</span>
+                  <InfoTooltip quote="The term structure tells you everything about how the market is pricing risk across time. When near-term vol trades above longer-term vol, the market is saying: the danger is NOW, not later. That's backwardation — and it's when convexity is most valuable." />
+                </>
+              }>
+                <TermStructureChart
+                  vixData={vixData ?? null}
+                  chain={chain ?? null}
+                  spotPrice={spotPrice}
+                  isIndex={["SPY", "QQQ", "IWM", "DIA", "EFA", "EEM"].includes(symbol)}
+                />
+              </Panel>
+            </div>
+            <div className="flex-1 border-b border-bb-gray">
+              <Panel title="IV Skew">
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-bb-amber text-[11px] font-bold">IMPLIED VOL SKEW</span>
+                  <InfoTooltip quote="Skew is the market's way of telling you it doesn't believe in the normal distribution. When put skew is steep, the market is pricing in fat tails — it's saying the probability of a large down move is much higher than Black-Scholes assumes. That's where the edge is." />
+                </div>
+                {chain && spotPrice > 0 ? (
+                  <SkewChart
+                    calls={Object.values(chain.chains)[0]?.calls ?? []}
+                    puts={Object.values(chain.chains)[0]?.puts ?? []}
+                    spotPrice={spotPrice}
+                  />
+                ) : (
+                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading options data...</div>
+                )}
+              </Panel>
+            </div>
+          </div>
+
+          {/* Kurtosis + Vol Surface */}
+          <div className="flex">
+            <div className="flex-1 border-r border-bb-gray">
+              <Panel title="Return Distribution">
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-bb-amber text-[11px] font-bold">KURTOSIS &amp; FAT TAILS</span>
+                  <InfoTooltip
+                    quote="The entire edifice of modern finance is built on the assumption that returns are normally distributed. They are not. The real world has fat tails — events that models say should happen once in ten thousand years happen every few years. That's where the risk — and the opportunity — lives."
+                    attribution="— Nassim Taleb"
+                  />
+                </div>
+                {history && history.length > 0 ? (
+                  <KurtosisChart history={history} />
+                ) : (
+                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading historical data...</div>
+                )}
+              </Panel>
+            </div>
+            <div className="flex-1">
+              <Panel title="Vol Surface">
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-bb-amber text-[11px] font-bold">VOLATILITY SURFACE</span>
+                  <InfoTooltip quote="The vol surface is a map of implied volatility across strikes and expirations. Each cell shows what the market is charging for options at that strike and date. Cool colors (blue) mean cheap vol, warm colors (red) mean expensive. You want to buy convexity where the surface is cool — that's where the market is underpricing risk." />
+                </div>
+                {chain && spotPrice > 0 ? (
+                  <VolSurface chain={chain} spotPrice={spotPrice} />
+                ) : (
+                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading surface data...</div>
+                )}
+              </Panel>
+            </div>
+          </div>
+
+          {/* Macro IV Chart */}
+          <div className="border-t border-bb-gray">
             <Panel title={
               <>
                 <span>Macro Overlay & IV Percentile</span>
@@ -163,75 +232,6 @@ export default function TickerDetailPage({
                 </div>
               )}
             </Panel>
-          </div>
-
-          {/* Middle row: Term Structure + Skew */}
-          <div className="flex flex-1 min-h-0">
-            <div className="flex-1 border-r border-b border-bb-gray overflow-auto">
-              <Panel title={
-                <>
-                  <span>{["SPY","QQQ","IWM","DIA"].includes(symbol) ? "VIX" : symbol} Term Structure</span>
-                  <InfoTooltip quote="The term structure tells you everything about how the market is pricing risk across time. When near-term vol trades above longer-term vol, the market is saying: the danger is NOW, not later. That's backwardation — and it's when convexity is most valuable." />
-                </>
-              }>
-                <TermStructureChart
-                  vixData={vixData ?? null}
-                  chain={chain ?? null}
-                  spotPrice={spotPrice}
-                  isIndex={["SPY", "QQQ", "IWM", "DIA", "EFA", "EEM"].includes(symbol)}
-                />
-              </Panel>
-            </div>
-            <div className="flex-1 border-b border-bb-gray overflow-auto">
-              <Panel title="IV Skew">
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-bb-amber text-[11px] font-bold">IMPLIED VOL SKEW</span>
-                  <InfoTooltip quote="Skew is the market's way of telling you it doesn't believe in the normal distribution. When put skew is steep, the market is pricing in fat tails — it's saying the probability of a large down move is much higher than Black-Scholes assumes. That's where the edge is." />
-                </div>
-                {chain && spotPrice > 0 ? (
-                  <SkewChart
-                    calls={Object.values(chain.chains)[0]?.calls ?? []}
-                    puts={Object.values(chain.chains)[0]?.puts ?? []}
-                    spotPrice={spotPrice}
-                  />
-                ) : (
-                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading options data...</div>
-                )}
-              </Panel>
-            </div>
-          </div>
-
-          {/* Bottom row: Kurtosis + Vol Surface */}
-          <div className="flex flex-1 min-h-0">
-            <div className="flex-1 border-r border-bb-gray overflow-auto">
-              <Panel title="Return Distribution">
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-bb-amber text-[11px] font-bold">KURTOSIS &amp; FAT TAILS</span>
-                  <InfoTooltip
-                    quote="The entire edifice of modern finance is built on the assumption that returns are normally distributed. They are not. The real world has fat tails — events that models say should happen once in ten thousand years happen every few years. That's where the risk — and the opportunity — lives."
-                    attribution="— Nassim Taleb"
-                  />
-                </div>
-                {history && history.length > 0 ? (
-                  <KurtosisChart history={history} />
-                ) : (
-                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading historical data...</div>
-                )}
-              </Panel>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <Panel title="Vol Surface">
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-bb-amber text-[11px] font-bold">VOLATILITY SURFACE</span>
-                  <InfoTooltip quote="The vol surface is a map of implied volatility across strikes and expirations. Each cell shows what the market is charging for options at that strike and date. Cool colors (blue) mean cheap vol, warm colors (red) mean expensive. You want to buy convexity where the surface is cool — that's where the market is underpricing risk." />
-                </div>
-                {chain && spotPrice > 0 ? (
-                  <VolSurface chain={chain} spotPrice={spotPrice} />
-                ) : (
-                  <div className="text-bb-white/40 text-[11px] animate-pulse">Loading surface data...</div>
-                )}
-              </Panel>
-            </div>
           </div>
         </div>
       </div>

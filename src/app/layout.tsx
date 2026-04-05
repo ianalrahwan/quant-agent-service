@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RAHWAN-BEAR-SWAN BROWSER TERMINAL",
+  title: "BEAR-SWAN BROWSER TERMINAL",
   description: "Long volatility scanner — Karsan & Taleb style",
 };
 
