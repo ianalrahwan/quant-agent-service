@@ -12,6 +12,7 @@ import { TermStructureChart } from "@/components/detail/TermStructure";
 import { SkewChart } from "@/components/detail/SkewChart";
 import { VolSurface } from "@/components/detail/VolSurface";
 import { KurtosisChart } from "@/components/detail/KurtosisChart";
+import { MacroIVChart } from "@/components/detail/MacroIVChart";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import type {
   QuoteData,
@@ -39,6 +40,11 @@ export default function TickerDetailPage({
   const { data: scanResults } = useSWR<ScanResult[]>("/api/scanner", fetcher, {
     revalidateOnFocus: false,
   });
+  const { data: macroData } = useSWR<Record<string, HistoricalBar[]>>(
+    "/api/macro",
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   const scanResult = scanResults?.find((r) => r.symbol === symbol);
 
@@ -131,9 +137,35 @@ export default function TickerDetailPage({
           </Panel>
         </div>
 
-        {/* Right: Visualizations in a grid */}
+        {/* Right: Visualizations */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top row: Term Structure + Skew */}
+          {/* Top row: Macro IV Chart (taller, fixed height) */}
+          <div className="border-b border-bb-gray overflow-auto" style={{ minHeight: "280px" }}>
+            <Panel title={
+              <>
+                <span>Macro Overlay & IV Percentile</span>
+                <InfoTooltip
+                  quote="You want to see how the vol regime of your ticker relates to what's happening in the broader macro landscape. When commodities spike on geopolitical risk and your ticker's IV percentile is still low, that's a dislocation — the market hasn't priced the contagion yet."
+                />
+              </>
+            }>
+              {history && history.length > 0 ? (
+                <MacroIVChart
+                  tickerSymbol={symbol}
+                  tickerHistory={history}
+                  macroData={macroData ?? {}}
+                  chain={chain ?? null}
+                  spotPrice={spotPrice}
+                />
+              ) : (
+                <div className="text-bb-white/40 text-[11px] animate-pulse">
+                  Loading chart data...
+                </div>
+              )}
+            </Panel>
+          </div>
+
+          {/* Middle row: Term Structure + Skew */}
           <div className="flex flex-1 min-h-0">
             <div className="flex-1 border-r border-b border-bb-gray overflow-auto">
               <Panel title={
