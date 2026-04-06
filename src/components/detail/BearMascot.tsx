@@ -82,10 +82,12 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
             </>
           ) : (
             <>
-              <line x1="30" y1="26" x2="36" y2="32" stroke="#ff433d" strokeWidth="2" />
-              <line x1="36" y1="26" x2="30" y2="32" stroke="#ff433d" strokeWidth="2" />
-              <line x1="44" y1="26" x2="50" y2="32" stroke="#ff433d" strokeWidth="2" />
-              <line x1="50" y1="26" x2="44" y2="32" stroke="#ff433d" strokeWidth="2" />
+              {/* Closed eyes, looking down in shame */}
+              <path d="M30 30 Q33 32 36 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round" />
+              <path d="M44 30 Q47 32 50 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round" />
+              {/* Sad eyebrows */}
+              <line x1="29" y1="25" x2="35" y2="27" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="51" y1="25" x2="45" y2="27" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
             </>
           )}
 
@@ -97,7 +99,7 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
           {state === "complete" ? (
             <path d="M35 41 Q40 46 45 41" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           ) : state === "error" ? (
-            <path d="M35 44 Q40 40 45 44" stroke="#ff433d" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <path d="M35 43 Q40 40 45 43" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           ) : (
             <>
               <path d="M40 38.5 L37.5 41" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
