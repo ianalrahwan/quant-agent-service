@@ -11,7 +11,9 @@ import { ScannerTable } from "@/components/scanner/ScannerTable";
 import { CriteriaBreakdown } from "@/components/scanner/CriteriaBreakdown";
 import { FilterControls } from "@/components/scanner/FilterControls";
 import { useKeyboard } from "@/hooks/useKeyboard";
-import type { ScanResult, VixTermStructure } from "@/lib/types";
+import type { ScanResult, VixTermStructure, CriterionResult } from "@/lib/types";
+import { signalFromScore } from "@/lib/types";
+import { SCANNER_UNIVERSE } from "@/lib/scanner/universe";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -33,20 +35,79 @@ export default function ScannerPage() {
   const [tickerInput, setTickerInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    data: scanResults,
-    isLoading,
-    mutate,
-  } = useSWR<ScanResult[]>("/api/scanner", fetcher, {
-    revalidateOnFocus: false,
-    refreshInterval: 120_000,
-  });
+  interface BackendScannerResult {
+    symbol: string;
+    scores: {
+      iv_percentile: number;
+      skew_kurtosis: number;
+      dealer_gamma: number;
+      term_structure: number;
+      vanna: number;
+      charm: number;
+      composite: number;
+    };
+    composite: number;
+    created_at: string;
+  }
+
+  const { data: scanScores, isLoading: scoresLoading, mutate } = useSWR<BackendScannerResult[]>(
+    "/api/scanner",
+    fetcher,
+    { revalidateOnFocus: false, refreshInterval: 120_000 }
+  );
+
+  const symbolsList = useMemo(
+    () => (scanScores ?? []).map((r) => r.symbol).join(","),
+    [scanScores]
+  );
+
+  const { data: quotes } = useSWR<Record<string, { price: number; change: number; changePct: number; name: string }>>(
+    symbolsList ? `/api/quotes?symbols=${symbolsList}` : null,
+    fetcher,
+    { revalidateOnFocus: false, refreshInterval: 60_000 }
+  );
+
+  const isLoading = scoresLoading;
 
   const { data: vixData } = useSWR<VixTermStructure>("/api/vix", fetcher, {
     refreshInterval: 60_000,
   });
 
-  const results = scanResults ?? [];
+  const results: ScanResult[] = useMemo(() => {
+    if (!scanScores) return [];
+
+    function criterion(score: number): CriterionResult {
+      return {
+        score,
+        rawValue: score,
+        label: score >= 0.75 ? "Elevated" : score >= 0.5 ? "Moderate" : score >= 0.25 ? "Low" : "Flat",
+        signal: signalFromScore(score),
+      };
+    }
+
+    return scanScores.map((r) => {
+      const q = quotes?.[r.symbol];
+      const entry = SCANNER_UNIVERSE.find((u) => u.symbol === r.symbol);
+
+      return {
+        symbol: r.symbol,
+        name: q?.name ?? entry?.name ?? r.symbol,
+        lastPrice: q?.price ?? 0,
+        change: q?.change ?? 0,
+        changePct: q?.changePct ?? 0,
+        compositeScore: r.composite,
+        criteria: {
+          ivPercentile: criterion(r.scores.iv_percentile),
+          skewKurtosis: criterion(r.scores.skew_kurtosis),
+          dealerGamma: criterion(r.scores.dealer_gamma),
+          termStructure: criterion(r.scores.term_structure),
+          vanna: criterion(r.scores.vanna),
+          charm: criterion(r.scores.charm),
+        },
+        timestamp: new Date(r.created_at).getTime(),
+      };
+    });
+  }, [scanScores, quotes]);
 
   const filtered = useMemo(() => {
     return results.filter((r) => {
