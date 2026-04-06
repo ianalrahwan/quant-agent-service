@@ -91,6 +91,20 @@ export interface TradeRecommendation {
   risk_reward: string;
 }
 
+// Polling types (replaces SSE EventSource)
+export interface PollEvent {
+  index: number;
+  type: "phase" | "checkpoint" | "stream" | "done" | "error" | "log";
+  data: PhaseEvent | CheckpointEvent | StreamEvent | DoneEvent | ErrorEvent | LogEvent;
+}
+
+export interface PollResponse {
+  events: PollEvent[];
+  cursor: number;
+  finished: boolean;
+  checkpoint: boolean;
+}
+
 export type BearState = "idle" | "thinking" | "checkpoint" | "complete" | "error";
 
 export interface AgentAnalysisState {

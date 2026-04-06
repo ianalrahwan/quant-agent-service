@@ -12,12 +12,10 @@ import type {
   JobResponse,
   LogEvent,
   PhaseEvent,
+  PollEvent,
+  PollResponse,
   StreamEvent,
-  TradeRecommendation,
 } from "@/lib/agent-types";
-
-// Proxy through Next.js API routes to avoid mixed content (HTTPS -> HTTP)
-const BACKEND_URL = "";
 
 const INITIAL_PHASES: [AgentPhase, "pending"][] = [
   ["freshness_check", "pending"],
@@ -44,12 +42,149 @@ function initialState(): AgentAnalysisState {
   };
 }
 
+function delay(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      },
+      { once: true }
+    );
+  });
+}
+
 export function useAgentAnalysis() {
   const [state, setState] = useState<AgentAnalysisState>(initialState);
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const resumeRef = useRef<(() => void) | null>(null);
+
+  function processBatch(events: PollEvent[]) {
+    setState((prev) => {
+      const phases = new Map(prev.phases);
+      let volSurface = prev.volSurface;
+      let narrativeTokens = prev.narrativeTokens;
+      let status = prev.status;
+      let checkpointMessage = prev.checkpointMessage;
+      let error = prev.error;
+      let totalTime = prev.totalTime;
+      const logs = [...prev.logs];
+
+      for (const evt of events) {
+        switch (evt.type) {
+          case "phase": {
+            const d = evt.data as PhaseEvent;
+            phases.set(d.phase, d.status === "complete" ? "complete" : "in_progress");
+            if (d.phase === "vol_surface" && d.data) volSurface = d.data;
+            break;
+          }
+          case "checkpoint": {
+            const d = evt.data as CheckpointEvent;
+            status = "checkpoint";
+            checkpointMessage = d.message;
+            logs.push(`⏸ Awaiting input: ${d.message}`);
+            break;
+          }
+          case "log": {
+            const d = evt.data as LogEvent;
+            logs.push(d.message);
+            break;
+          }
+          case "stream": {
+            const d = evt.data as StreamEvent;
+            narrativeTokens += d.token;
+            break;
+          }
+          case "done": {
+            const d = evt.data as DoneEvent;
+            status = "complete";
+            totalTime = d.total_time;
+            logs.push(`✓ Analysis complete in ${d.total_time.toFixed(1)}s`);
+            break;
+          }
+          case "error": {
+            const d = evt.data as ErrorEvent;
+            status = "error";
+            error = d.error;
+            logs.push(`✗ Error: ${d.error}`);
+            break;
+          }
+        }
+      }
+
+      return {
+        ...prev,
+        phases,
+        volSurface,
+        narrativeTokens,
+        status,
+        checkpointMessage,
+        error,
+        totalTime,
+        logs,
+      };
+    });
+  }
+
+  async function pollLoop(jobId: string, signal: AbortSignal) {
+    let cursor = 0;
+
+    while (!signal.aborted) {
+      let batch: PollResponse;
+      try {
+        const resp = await fetch(`/api/agent/poll/${jobId}?cursor=${cursor}`, { signal });
+        batch = await resp.json();
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setState((prev) => ({
+          ...prev,
+          status: "error",
+          error: "Connection lost",
+          logs: [...prev.logs, "✗ Error: Connection lost"],
+        }));
+        return;
+      }
+
+      if (batch.events.length > 0) {
+        processBatch(batch.events);
+      }
+
+      cursor = batch.cursor;
+
+      if (batch.finished) return;
+
+      if (batch.checkpoint) {
+        // Pause polling until resumeCheckpoint() is called
+        try {
+          await new Promise<void>((resolve, reject) => {
+            resumeRef.current = resolve;
+            signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+          });
+        } catch {
+          return;
+        }
+        continue;
+      }
+
+      // If no events, wait before next poll to avoid tight loop
+      if (batch.events.length === 0) {
+        try {
+          await delay(1000, signal);
+        } catch {
+          return;
+        }
+      }
+    }
+  }
 
   const startAnalysis = useCallback(
     async (symbol: string, request: AnalyzeRequest) => {
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+
       setState({ ...initialState(), status: "running" });
 
       try {
@@ -57,6 +192,7 @@ export function useAgentAnalysis() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(request),
+          signal: ac.signal,
         });
 
         if (!resp.ok) throw new Error(`Analysis request failed: ${resp.status}`);
@@ -64,73 +200,9 @@ export function useAgentAnalysis() {
         const { job_id }: JobResponse = await resp.json();
         setState((prev) => ({ ...prev, jobId: job_id }));
 
-        const es = new EventSource(`/api/agent/stream/${job_id}`);
-        eventSourceRef.current = es;
-
-        es.addEventListener("phase", (e) => {
-          const data: PhaseEvent = JSON.parse(e.data);
-          setState((prev) => {
-            const phases = new Map(prev.phases);
-            phases.set(data.phase, data.status === "complete" ? "complete" : "in_progress");
-            return {
-              ...prev,
-              phases,
-              volSurface:
-                data.phase === "vol_surface" && data.data ? data.data : prev.volSurface,
-            };
-          });
-        });
-
-        es.addEventListener("checkpoint", (e) => {
-          const data: CheckpointEvent = JSON.parse(e.data);
-          setState((prev) => ({
-            ...prev,
-            status: "checkpoint",
-            checkpointMessage: data.message,
-            logs: [...prev.logs, `⏸ Awaiting input: ${data.message}`],
-          }));
-        });
-
-        es.addEventListener("log", (e) => {
-          const data: LogEvent = JSON.parse(e.data);
-          setState((prev) => ({
-            ...prev,
-            logs: [...prev.logs, data.message],
-          }));
-        });
-
-        es.addEventListener("stream", (e) => {
-          const data: StreamEvent = JSON.parse(e.data);
-          setState((prev) => ({
-            ...prev,
-            narrativeTokens: prev.narrativeTokens + data.token,
-          }));
-        });
-
-        es.addEventListener("done", (e) => {
-          const data: DoneEvent = JSON.parse(e.data);
-          setState((prev) => ({
-            ...prev,
-            status: "complete",
-            totalTime: data.total_time,
-            logs: [...prev.logs, `✓ Analysis complete in ${data.total_time.toFixed(1)}s`],
-          }));
-          es.close();
-        });
-
-        es.addEventListener("error", (e) => {
-          if (e instanceof MessageEvent) {
-            const data: ErrorEvent = JSON.parse(e.data);
-            setState((prev) => ({
-              ...prev,
-              status: "error",
-              error: data.error,
-              logs: [...prev.logs, `✗ Error: ${data.error}`],
-            }));
-          }
-          es.close();
-        });
+        pollLoop(job_id, ac.signal);
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setState((prev) => ({
           ...prev,
           status: "error",
@@ -156,10 +228,16 @@ export function useAgentAnalysis() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ checkpoint: "resume", user_input: { proceed: true } }),
     });
+
+    // Unblock the poll loop
+    resumeRef.current?.();
+    resumeRef.current = null;
   }, [state.jobId]);
 
   const reset = useCallback(() => {
-    eventSourceRef.current?.close();
+    abortRef.current?.abort();
+    abortRef.current = null;
+    resumeRef.current = null;
     setState(initialState());
   }, []);
 
