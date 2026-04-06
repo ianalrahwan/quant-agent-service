@@ -135,7 +135,7 @@ export function useAgentAnalysis() {
     });
   }
 
-  async function pollLoop(jobId: string, signal: AbortSignal) {
+  async function pollLoop(jobId: string, symbol: string, signal: AbortSignal) {
     let cursor = 0;
 
     while (!signal.aborted) {
@@ -160,7 +160,23 @@ export function useAgentAnalysis() {
 
       cursor = batch.cursor;
 
-      if (batch.finished) return;
+      if (batch.finished) {
+        // Fetch cached analysis to populate trade recs and narrative
+        try {
+          const cacheResp = await fetch(`/api/agent/cached/${symbol}`);
+          if (cacheResp.ok) {
+            const data: CachedAnalysis = await cacheResp.json();
+            setState((prev) => ({
+              ...prev,
+              tradeRecs: data.trade_recs,
+              narrativeTokens: prev.narrativeTokens || data.narrative,
+            }));
+          }
+        } catch {
+          // Cache fetch failed — trade recs won't show, but analysis still complete
+        }
+        return;
+      }
 
       if (batch.checkpoint) {
         // Pause polling until resumeCheckpoint() is called
@@ -207,7 +223,7 @@ export function useAgentAnalysis() {
         const { job_id }: JobResponse = await resp.json();
         setState((prev) => ({ ...prev, jobId: job_id }));
 
-        pollLoop(job_id, ac.signal);
+        pollLoop(job_id, symbol, ac.signal);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setState((prev) => ({
