@@ -107,6 +107,17 @@ export interface PollResponse {
 
 export type BearState = "idle" | "thinking" | "checkpoint" | "complete" | "error";
 
+export interface CachedAnalysis {
+  symbol: string;
+  scanner_signals: ScannerSignals;
+  narrative: string;
+  trade_recs: TradeRecommendation[];
+  vol_surface: Record<string, unknown> | null;
+  phases_log: string[];
+  total_time: number;
+  created_at: string;
+}
+
 export interface AgentAnalysisState {
   status: "idle" | "running" | "checkpoint" | "complete" | "error";
   jobId: string | null;
@@ -118,4 +129,5 @@ export interface AgentAnalysisState {
   error: string | null;
   totalTime: number | null;
   logs: string[];
+  cachedAt: string | null;
 }

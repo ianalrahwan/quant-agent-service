@@ -6,6 +6,7 @@ import type {
   AgentPhase,
   AnalyzeRequest,
   BearState,
+  CachedAnalysis,
   CheckpointEvent,
   DoneEvent,
   ErrorEvent,
@@ -39,6 +40,7 @@ function initialState(): AgentAnalysisState {
     error: null,
     totalTime: null,
     logs: [],
+    cachedAt: null,
   };
 }
 
@@ -241,6 +243,35 @@ export function useAgentAnalysis() {
     setState(initialState());
   }, []);
 
+  const loadCached = useCallback(async (symbol: string) => {
+    try {
+      const resp = await fetch(`/api/agent/cached/${symbol}`);
+      if (!resp.ok) return;
+      const data: CachedAnalysis = await resp.json();
+
+      const phases = new Map(INITIAL_PHASES) as Map<AgentPhase, "pending" | "in_progress" | "complete">;
+      for (const key of phases.keys()) {
+        phases.set(key, "complete");
+      }
+
+      setState({
+        status: "complete",
+        jobId: null,
+        phases,
+        volSurface: data.vol_surface,
+        narrativeTokens: data.narrative,
+        tradeRecs: data.trade_recs,
+        checkpointMessage: null,
+        error: null,
+        totalTime: data.total_time,
+        logs: data.phases_log,
+        cachedAt: data.created_at,
+      });
+    } catch {
+      // No cache available — stay idle
+    }
+  }, []);
+
   const bearState: BearState =
     state.status === "idle"
       ? "idle"
@@ -258,5 +289,6 @@ export function useAgentAnalysis() {
     startAnalysis,
     resumeCheckpoint,
     reset,
+    loadCached,
   };
 }

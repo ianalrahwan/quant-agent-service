@@ -51,7 +51,11 @@ export default function TickerDetailPage({
 
   const scanResult = scanResults?.find((r) => r.symbol === symbol);
 
-  const { state: agentState, bearState, startAnalysis, resumeCheckpoint, reset } = useAgentAnalysis();
+  const { state: agentState, bearState, startAnalysis, resumeCheckpoint, reset, loadCached } = useAgentAnalysis();
+
+  useEffect(() => {
+    loadCached(symbol);
+  }, [symbol, loadCached]);
 
   const handleStartAnalysis = useCallback(() => {
     if (!scanResult) return;

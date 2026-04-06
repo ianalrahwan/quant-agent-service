@@ -6,6 +6,14 @@ import { BearMascot } from "./BearMascot";
 import { PhasePipeline } from "./PhasePipeline";
 import { TradeRecCards } from "./TradeRecCards";
 
+function timeAgo(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.floor(mins / 60)}h ago`;
+}
+
 interface AgentPanelProps {
   state: AgentAnalysisState;
   bearState: BearState;
@@ -42,6 +50,14 @@ export function AgentPanel({
               className="px-3 py-1 border border-bb-green text-bb-green text-xs hover:bg-bb-green/10 transition-colors"
             >
               RUN ANALYSIS [F5]
+            </button>
+          )}
+          {state.status === "complete" && (
+            <button
+              onClick={onStart}
+              className="px-3 py-1 border border-bb-green text-bb-green text-xs hover:bg-bb-green/10 transition-colors"
+            >
+              {state.cachedAt ? "REFRESH ANALYSIS [F5]" : "RUN ANALYSIS [F5]"}
             </button>
           )}
           {state.status === "checkpoint" && (
@@ -116,6 +132,11 @@ export function AgentPanel({
       {state.status === "complete" && state.totalTime && (
         <div className="text-xs text-bb-green">
           ✓ Analysis complete in {state.totalTime.toFixed(1)}s
+          {state.cachedAt && (
+            <span className="text-xs text-bb-white/40 font-mono ml-2">
+              cached {timeAgo(state.cachedAt)}
+            </span>
+          )}
         </div>
       )}
     </div>
