@@ -1,6 +1,7 @@
 "use client";
 
 import type { AgentAnalysisState, BearState } from "@/lib/agent-types";
+import { AgentLog } from "./AgentLog";
 import { BearMascot } from "./BearMascot";
 import { PhasePipeline } from "./PhasePipeline";
 import { TradeRecCards } from "./TradeRecCards";
@@ -66,6 +67,13 @@ export function AgentPanel({
       {state.status !== "idle" && (
         <div className="mb-3">
           <PhasePipeline phases={state.phases} />
+        </div>
+      )}
+
+      {/* Log output */}
+      {state.logs.length > 0 && (
+        <div className="mb-3">
+          <AgentLog logs={state.logs} />
         </div>
       )}
 
