@@ -8,8 +8,9 @@ interface BearMascotProps {
 }
 
 /**
- * California Republic-style bear. Runs when thinking, sits when error/idle.
- * Minimal, blocky silhouette — like a woodcut or flag print.
+ * California Republic-style bear silhouette.
+ * Walking pose when thinking/checkpoint/complete. Sitting when idle/error.
+ * Single clean path per pose — no overlapping shapes.
  */
 export function BearMascot({ state, size = 64 }: BearMascotProps) {
   const isRunning = state === "thinking";
@@ -18,93 +19,102 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        className={`relative ${isRunning ? "animate-[walk_0.6s_steps(2)_infinite]" : ""}`}
-        style={{ width: size, height: size }}
+        className="relative"
+        style={{ width: size, height: size * 0.65 }}
       >
         <svg
-          viewBox="0 0 100 70"
+          viewBox="0 0 120 70"
           width={size}
-          height={size * 0.7}
+          height={size * 0.65}
           xmlns="http://www.w3.org/2000/svg"
-          className="fill-current text-bb-amber"
         >
           {isSitting ? (
-            /* ── SITTING POSE ── */
-            <g>
+            /* ── SITTING: compact silhouette, head up ── */
+            <g className="fill-bb-amber">
+              {/* Single body+head path */}
+              <path d={[
+                "M40,62",           // bottom left
+                "L40,44",           // up to belly
+                "Q36,36 34,30",     // curve up to shoulder
+                "Q30,20 36,14",     // up to head top
+                "Q42,6 50,12",      // over head
+                "Q56,6 62,14",      // right side of head
+                "Q68,20 64,30",     // down from head
+                "Q62,36 60,44",     // shoulder to belly
+                "L60,62",           // down right side
+                "Z",
+              ].join(" ")} />
               {/* Ears */}
-              <circle cx="38" cy="14" r="5" />
-              <circle cx="52" cy="14" r="5" />
-              {/* Head */}
-              <ellipse cx="45" cy="22" rx="12" ry="10" />
+              <circle cx="38" cy="10" r="5" />
+              <circle cx="60" cy="10" r="5" />
+              {/* Front paws */}
+              <rect x="40" y="56" width="8" height="10" rx="4" />
+              <rect x="52" y="56" width="8" height="10" rx="4" />
+              {/* Hind haunch */}
+              <ellipse cx="56" cy="54" rx="12" ry="8" />
               {/* Eye */}
-              <circle cx="49" cy="20" r="1.5" className="fill-bb-black" />
-              {/* Snout */}
-              <ellipse cx="53" cy="24" rx="5" ry="3.5" className="fill-bb-orange" />
-              <circle cx="55" cy="23" r="1.2" className="fill-bb-black" />
-              {/* Body — hunched, sitting */}
-              <ellipse cx="45" cy="42" rx="18" ry="14" />
-              {/* Hump */}
-              <ellipse cx="38" cy="30" rx="10" ry="7" />
-              {/* Front legs (tucked) */}
-              <rect x="32" y="50" width="7" height="12" rx="3" />
-              <rect x="42" y="50" width="7" height="12" rx="3" />
-              {/* Hind leg (folded under) */}
-              <ellipse cx="58" cy="52" rx="10" ry="6" />
-              {/* Paws */}
-              <ellipse cx="35" cy="62" rx="5" ry="3" />
-              <ellipse cx="45" cy="62" rx="5" ry="3" />
-              {/* Tail */}
-              <circle cx="66" cy="44" r="4" />
+              <circle cx="54" cy="18" r="1.8" className="fill-bb-black" />
+              {/* Nose */}
+              <circle cx="62" cy="22" r="2" className="fill-bb-black" />
+              {/* Snout highlight */}
+              <ellipse cx="60" cy="23" rx="5" ry="3" className="fill-bb-orange" />
             </g>
           ) : (
-            /* ── WALKING/RUNNING POSE ── */
-            <g>
+            /* ── WALKING: stretched out, legs extended ── */
+            <g className="fill-bb-amber">
+              {/* Body — single horizontal shape */}
+              <path d={[
+                "M20,40",           // tail end
+                "Q18,34 24,30",     // rump up
+                "Q30,24 50,24",     // back line
+                "Q64,22 72,18",     // shoulder hump
+                "Q78,14 82,18",     // neck to head
+                "Q92,10 96,16",     // top of head
+                "Q100,12 102,18",   // forehead
+                "Q106,22 100,26",   // face front
+                "Q96,30 88,28",     // chin back
+                "Q82,28 78,32",     // under jaw to chest
+                "Q70,38 60,38",     // belly
+                "Q40,40 24,38",     // under belly
+                "Q20,38 20,40",     // back to start
+                "Z",
+              ].join(" ")} />
               {/* Ears */}
-              <circle cx="68" cy="10" r="5" />
-              <circle cx="80" cy="10" r="5" />
-              {/* Head */}
-              <ellipse cx="75" cy="18" rx="12" ry="10" />
-              {/* Eye */}
-              <circle cx="80" cy="16" r="1.5" className="fill-bb-black" />
-              {/* Snout */}
-              <ellipse cx="85" cy="20" rx="5" ry="3.5" className="fill-bb-orange" />
-              <circle cx="88" cy="19" r="1.2" className="fill-bb-black" />
-              {/* Body */}
-              <ellipse cx="52" cy="30" rx="26" ry="13" />
-              {/* Shoulder hump */}
-              <ellipse cx="65" cy="22" rx="10" ry="8" />
-              {/* Front legs (stride) */}
+              <circle cx="90" cy="12" r="4" />
+              <circle cx="100" cy="12" r="4" />
+              {/* Shoulder hump emphasis */}
+              <ellipse cx="70" cy="22" rx="8" ry="5" />
+              {/* Front legs */}
               <rect
-                x="62" y="38" width="6" height="20" rx="3"
-                className={isRunning ? "origin-top animate-[legSwing_0.6s_ease-in-out_infinite]" : ""}
+                x="72" y="34" width="6" height="24" rx="3"
+                style={isRunning ? { transformOrigin: "75px 34px", animation: "legF 0.4s ease-in-out infinite alternate" } : undefined}
               />
               <rect
-                x="70" y="38" width="6" height="20" rx="3"
-                className={isRunning ? "origin-top animate-[legSwingAlt_0.6s_ease-in-out_infinite]" : ""}
+                x="80" y="34" width="6" height="24" rx="3"
+                style={isRunning ? { transformOrigin: "83px 34px", animation: "legF 0.4s ease-in-out infinite alternate-reverse" } : undefined}
               />
-              {/* Hind legs (stride) */}
+              {/* Hind legs */}
               <rect
-                x="32" y="36" width="6" height="22" rx="3"
-                className={isRunning ? "origin-top animate-[legSwingAlt_0.6s_ease-in-out_infinite]" : ""}
+                x="28" y="34" width="6" height="24" rx="3"
+                style={isRunning ? { transformOrigin: "31px 34px", animation: "legH 0.4s ease-in-out infinite alternate-reverse" } : undefined}
               />
               <rect
-                x="40" y="36" width="6" height="22" rx="3"
-                className={isRunning ? "origin-top animate-[legSwing_0.6s_ease-in-out_infinite]" : ""}
+                x="36" y="34" width="6" height="24" rx="3"
+                style={isRunning ? { transformOrigin: "39px 34px", animation: "legH 0.4s ease-in-out infinite alternate" } : undefined}
               />
-              {/* Paws */}
-              <ellipse cx="65" cy="58" rx="5" ry="3" />
-              <ellipse cx="73" cy="58" rx="5" ry="3" />
-              <ellipse cx="35" cy="58" rx="5" ry="3" />
-              <ellipse cx="43" cy="58" rx="5" ry="3" />
               {/* Tail */}
-              <circle cx="26" cy="28" r="4" />
+              <path d="M20,36 Q12,28 16,24" strokeWidth="4" className="stroke-bb-amber" fill="none" strokeLinecap="round" />
+              {/* Eye */}
+              <circle cx="98" cy="18" r="1.5" className="fill-bb-black" />
+              {/* Nose */}
+              <circle cx="104" cy="22" r="1.8" className="fill-bb-black" />
             </g>
           )}
 
-          {/* Star (California flag homage) — shown on complete */}
+          {/* Star — California flag homage, shown on complete */}
           {state === "complete" && (
             <polygon
-              points="10,18 12.5,12 15,18 9,14.5 16,14.5"
+              points="8,20 10.5,14 13,20 7,16.5 14,16.5"
               className="fill-bb-green"
             />
           )}
@@ -119,19 +129,14 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
         {state === "error" && "ERROR"}
       </span>
 
-      {/* Keyframe styles for leg animation */}
       <style>{`
-        @keyframes legSwing {
-          0%, 100% { transform: rotate(-15deg); }
-          50% { transform: rotate(15deg); }
+        @keyframes legF {
+          from { transform: rotate(-20deg); }
+          to { transform: rotate(20deg); }
         }
-        @keyframes legSwingAlt {
-          0%, 100% { transform: rotate(15deg); }
-          50% { transform: rotate(-15deg); }
-        }
-        @keyframes walk {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(0); }
+        @keyframes legH {
+          from { transform: rotate(-15deg); }
+          to { transform: rotate(15deg); }
         }
       `}</style>
     </div>
