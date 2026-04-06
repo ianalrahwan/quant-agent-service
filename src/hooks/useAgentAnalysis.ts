@@ -15,7 +15,8 @@ import type {
   TradeRecommendation,
 } from "@/lib/agent-types";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_AGENT_BACKEND_URL || "http://localhost:8000";
+// Proxy through Next.js API routes to avoid mixed content (HTTPS -> HTTP)
+const BACKEND_URL = "";
 
 const INITIAL_PHASES: [AgentPhase, "pending"][] = [
   ["freshness_check", "pending"],
@@ -50,7 +51,7 @@ export function useAgentAnalysis() {
       setState({ ...initialState(), status: "running" });
 
       try {
-        const resp = await fetch(`${BACKEND_URL}/analyze/${symbol}`, {
+        const resp = await fetch(`/api/agent/analyze/${symbol}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(request),
@@ -61,7 +62,7 @@ export function useAgentAnalysis() {
         const { job_id }: JobResponse = await resp.json();
         setState((prev) => ({ ...prev, jobId: job_id }));
 
-        const es = new EventSource(`${BACKEND_URL}/stream/${job_id}`);
+        const es = new EventSource(`/api/agent/stream/${job_id}`);
         eventSourceRef.current = es;
 
         es.addEventListener("phase", (e) => {
@@ -137,7 +138,7 @@ export function useAgentAnalysis() {
       checkpointMessage: null,
     }));
 
-    await fetch(`${BACKEND_URL}/stream/${jobId}/resume`, {
+    await fetch(`/api/agent/stream/${jobId}/resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ checkpoint: "resume", user_input: { proceed: true } }),
