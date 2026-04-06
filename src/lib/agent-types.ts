@@ -65,6 +65,11 @@ export interface ErrorEvent {
   error: string;
 }
 
+export interface LogEvent {
+  message: string;
+  phase?: string;
+}
+
 export type SSEEvent =
   | { type: "phase"; data: PhaseEvent }
   | { type: "checkpoint"; data: CheckpointEvent }
@@ -98,4 +103,5 @@ export interface AgentAnalysisState {
   checkpointMessage: string | null;
   error: string | null;
   totalTime: number | null;
+  logs: string[];
 }
