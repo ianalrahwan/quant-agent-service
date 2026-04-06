@@ -20,12 +20,12 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
     <div className="flex flex-col items-center gap-1">
       <div
         className="relative"
-        style={{ width: size, height: size * 0.65 }}
+        style={{ width: size * 1.7, height: size }}
       >
         <svg
           viewBox="0 0 120 70"
-          width={size}
-          height={size * 0.65}
+          width={size * 1.7}
+          height={size}
           xmlns="http://www.w3.org/2000/svg"
         >
           {isSitting ? (
