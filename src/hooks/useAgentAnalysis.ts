@@ -20,7 +20,12 @@ import type {
 
 const INITIAL_PHASES: [AgentPhase, "pending"][] = [
   ["freshness_check", "pending"],
-  ["discovery", "pending"],
+  ["crawl_earnings", "pending"],
+  ["crawl_news", "pending"],
+  ["crawl_podcasts", "pending"],
+  ["crawl_cftc", "pending"],
+  ["chunk_embed", "pending"],
+  ["index", "pending"],
   ["signal_confirm", "pending"],
   ["vol_surface", "pending"],
   ["narrative_sources", "pending"],

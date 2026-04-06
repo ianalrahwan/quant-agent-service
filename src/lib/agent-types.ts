@@ -32,7 +32,14 @@ export interface SourceSummary {
 // SSE event types
 export type AgentPhase =
   | "freshness_check"
-  | "discovery"
+  // Discovery (parallel crawlers + sequential processing)
+  | "crawl_earnings"
+  | "crawl_news"
+  | "crawl_podcasts"
+  | "crawl_cftc"
+  | "chunk_embed"
+  | "index"
+  // Trader (sequential)
   | "signal_confirm"
   | "vol_surface"
   | "narrative_sources"
@@ -41,7 +48,7 @@ export type AgentPhase =
 
 export interface PhaseEvent {
   phase: AgentPhase;
-  status: "in_progress" | "complete";
+  status: "in_progress" | "complete" | "error";
   data?: Record<string, unknown>;
 }
 
