@@ -10,6 +10,7 @@ import type {
   DoneEvent,
   ErrorEvent,
   JobResponse,
+  LogEvent,
   PhaseEvent,
   StreamEvent,
   TradeRecommendation,
@@ -39,6 +40,7 @@ function initialState(): AgentAnalysisState {
     checkpointMessage: null,
     error: null,
     totalTime: null,
+    logs: [],
   };
 }
 
@@ -85,6 +87,15 @@ export function useAgentAnalysis() {
             ...prev,
             status: "checkpoint",
             checkpointMessage: data.message,
+            logs: [...prev.logs, `⏸ Awaiting input: ${data.message}`],
+          }));
+        });
+
+        es.addEventListener("log", (e) => {
+          const data: LogEvent = JSON.parse(e.data);
+          setState((prev) => ({
+            ...prev,
+            logs: [...prev.logs, data.message],
           }));
         });
 
@@ -102,6 +113,7 @@ export function useAgentAnalysis() {
             ...prev,
             status: "complete",
             totalTime: data.total_time,
+            logs: [...prev.logs, `✓ Analysis complete in ${data.total_time.toFixed(1)}s`],
           }));
           es.close();
         });
@@ -113,6 +125,7 @@ export function useAgentAnalysis() {
               ...prev,
               status: "error",
               error: data.error,
+              logs: [...prev.logs, `✗ Error: ${data.error}`],
             }));
           }
           es.close();
