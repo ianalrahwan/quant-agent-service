@@ -20,57 +20,66 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
           height={size}
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Ears */}
-          <circle cx="16" cy="12" r="10" fill="#333" />
-          <circle cx="48" cy="12" r="10" fill="#333" />
-          <circle cx="16" cy="12" r="6" fill="#555" />
-          <circle cx="48" cy="12" r="6" fill="#555" />
+          {/* Ears - rounded bear ears */}
+          <ellipse cx="14" cy="14" r="9" fill="#8B5E3C" />
+          <ellipse cx="50" cy="14" r="9" fill="#8B5E3C" />
+          <ellipse cx="14" cy="14" r="5" fill="#C4956A" />
+          <ellipse cx="50" cy="14" r="5" fill="#C4956A" />
 
           {/* Head */}
-          <circle cx="32" cy="32" r="22" fill="#444" />
+          <circle cx="32" cy="34" r="22" fill="#A0673C" />
+
+          {/* Muzzle */}
+          <ellipse cx="32" cy="40" rx="12" ry="9" fill="#C9A87C" />
 
           {/* Eyes */}
           {state === "idle" ? (
             <>
-              <circle cx="24" cy="28" r="3" fill="#4af6c3" />
-              <circle cx="40" cy="28" r="3" fill="#4af6c3" />
+              <circle cx="24" cy="29" r="3" fill="#1a1a1a" />
+              <circle cx="40" cy="29" r="3" fill="#1a1a1a" />
+              <circle cx="25" cy="28" r="1" fill="#fff" />
+              <circle cx="41" cy="28" r="1" fill="#fff" />
             </>
           ) : state === "thinking" ? (
             <>
-              <line x1="21" y1="28" x2="27" y2="28" stroke="#4af6c3" strokeWidth="2" />
-              <line x1="37" y1="28" x2="43" y2="28" stroke="#4af6c3" strokeWidth="2" />
+              <line x1="21" y1="29" x2="27" y2="29" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="37" y1="29" x2="43" y2="29" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
             </>
           ) : state === "checkpoint" ? (
             <>
-              <circle cx="24" cy="28" r="4" fill="#ffa500" />
-              <circle cx="40" cy="28" r="4" fill="#ffa500" />
-              <circle cx="24" cy="28" r="2" fill="#0a0a0a" />
-              <circle cx="40" cy="28" r="2" fill="#0a0a0a" />
+              <circle cx="24" cy="29" r="4" fill="#ffa500" />
+              <circle cx="40" cy="29" r="4" fill="#ffa500" />
+              <circle cx="24" cy="29" r="2" fill="#1a1a1a" />
+              <circle cx="40" cy="29" r="2" fill="#1a1a1a" />
             </>
           ) : state === "complete" ? (
             <>
-              <path d="M21 27 Q24 24 27 27" stroke="#4af6c3" strokeWidth="2" fill="none" />
-              <path d="M37 27 Q40 24 43 27" stroke="#4af6c3" strokeWidth="2" fill="none" />
+              <path d="M21 28 Q24 25 27 28" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M37 28 Q40 25 43 28" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
             </>
           ) : (
             <>
-              <line x1="21" y1="25" x2="27" y2="31" stroke="#ff433d" strokeWidth="2" />
-              <line x1="27" y1="25" x2="21" y2="31" stroke="#ff433d" strokeWidth="2" />
-              <line x1="37" y1="25" x2="43" y2="31" stroke="#ff433d" strokeWidth="2" />
-              <line x1="43" y1="25" x2="37" y2="31" stroke="#ff433d" strokeWidth="2" />
+              <line x1="21" y1="26" x2="27" y2="32" stroke="#ff433d" strokeWidth="2" />
+              <line x1="27" y1="26" x2="21" y2="32" stroke="#ff433d" strokeWidth="2" />
+              <line x1="37" y1="26" x2="43" y2="32" stroke="#ff433d" strokeWidth="2" />
+              <line x1="43" y1="26" x2="37" y2="32" stroke="#ff433d" strokeWidth="2" />
             </>
           )}
 
           {/* Nose */}
-          <ellipse cx="32" cy="35" rx="4" ry="3" fill="#222" />
+          <ellipse cx="32" cy="37" rx="4" ry="3" fill="#1a1a1a" />
+          <ellipse cx="31" cy="36.5" rx="1.5" ry="1" fill="#444" opacity="0.5" />
 
           {/* Mouth */}
           {state === "complete" ? (
-            <path d="M26 40 Q32 46 38 40" stroke="#4af6c3" strokeWidth="1.5" fill="none" />
+            <path d="M27 42 Q32 47 37 42" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           ) : state === "error" ? (
-            <path d="M26 44 Q32 38 38 44" stroke="#ff433d" strokeWidth="1.5" fill="none" />
+            <path d="M27 46 Q32 41 37 46" stroke="#ff433d" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           ) : (
-            <line x1="28" y1="42" x2="36" y2="42" stroke="#999" strokeWidth="1.5" />
+            <>
+              <path d="M32 40 L29 43" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <path d="M32 40 L35 43" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            </>
           )}
         </svg>
 
