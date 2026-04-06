@@ -173,6 +173,19 @@ export default function TickerDetailPage({
 
         {/* Right: Visualizations — single scrollable column */}
         <div className="flex-1 overflow-auto">
+          {/* Agent Analysis */}
+          <div className="border-b border-bb-gray">
+            <Panel title="Agent Analysis">
+              <AgentPanel
+                state={agentState}
+                bearState={bearState}
+                onStart={handleStartAnalysis}
+                onResume={resumeCheckpoint}
+                onReset={reset}
+              />
+            </Panel>
+          </div>
+
           {/* Term Structure + Skew */}
           <div className="flex">
             <div className="flex-1 border-r border-b border-bb-gray">
@@ -268,18 +281,6 @@ export default function TickerDetailPage({
             </Panel>
           </div>
 
-          {/* Agent Analysis */}
-          <div className="border-t border-bb-gray">
-            <Panel title="Agent Analysis">
-              <AgentPanel
-                state={agentState}
-                bearState={bearState}
-                onStart={handleStartAnalysis}
-                onResume={resumeCheckpoint}
-                onReset={reset}
-              />
-            </Panel>
-          </div>
         </div>
       </div>
 
