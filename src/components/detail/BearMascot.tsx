@@ -7,116 +7,108 @@ interface BearMascotProps {
   size?: number;
 }
 
+/**
+ * California Republic-style bear. Runs when thinking, sits when error/idle.
+ * Minimal, blocky silhouette — like a woodcut or flag print.
+ */
 export function BearMascot({ state, size = 64 }: BearMascotProps) {
+  const isRunning = state === "thinking";
+  const isSitting = state === "error" || state === "idle";
+
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        className={`relative ${state === "thinking" ? "animate-bounce" : ""}`}
+        className={`relative ${isRunning ? "animate-[walk_0.6s_steps(2)_infinite]" : ""}`}
         style={{ width: size, height: size }}
       >
         <svg
-          viewBox="0 0 80 100"
+          viewBox="0 0 100 70"
           width={size}
-          height={size * 1.25}
+          height={size * 0.7}
           xmlns="http://www.w3.org/2000/svg"
+          className="fill-current text-bb-amber"
         >
-          {/* --- BODY / OUTFIT --- */}
-          {/* Suit jacket */}
-          <path d="M22 62 L22 96 Q22 100 26 100 L54 100 Q58 100 58 96 L58 62 Q50 56 40 56 Q30 56 22 62Z" fill="#1e293b" />
-          {/* Jacket lapels */}
-          <path d="M34 56 L30 72 L40 68Z" fill="#334155" />
-          <path d="M46 56 L50 72 L40 68Z" fill="#334155" />
-          {/* White dress shirt */}
-          <path d="M36 56 L34 100 L46 100 L44 56Z" fill="#e2e8f0" />
-          {/* Tie */}
-          <path d="M40 58 L37 66 L40 88 L43 66Z" fill="#dc2626" />
-          <path d="M38.5 62 L41.5 62 L40 64Z" fill="#b91c1c" />
-
-          {/* Arms in suit sleeves */}
-          <rect x="14" y="62" width="10" height="28" rx="5" fill="#1e293b" />
-          <rect x="56" y="62" width="10" height="28" rx="5" fill="#1e293b" />
-          {/* Paws */}
-          <circle cx="19" cy="92" r="5" fill="#A0673C" />
-          <circle cx="61" cy="92" r="5" fill="#A0673C" />
-
-          {/* Neck - connects head to body */}
-          <rect x="33" y="50" width="14" height="10" rx="2" fill="#A0673C" />
-
-          {/* --- HEAD --- */}
-          {/* Ears - visible behind head */}
-          <circle cx="20" cy="24" r="8" fill="#8B5E3C" />
-          <circle cx="60" cy="24" r="8" fill="#8B5E3C" />
-          <circle cx="20" cy="24" r="5" fill="#C4956A" />
-          <circle cx="60" cy="24" r="5" fill="#C4956A" />
-
-          {/* Head */}
-          <circle cx="40" cy="32" r="20" fill="#A0673C" />
-
-          {/* Muzzle */}
-          <ellipse cx="40" cy="38" rx="11" ry="8" fill="#C9A87C" />
-
-          {/* Eyes */}
-          {state === "idle" ? (
-            <>
-              <circle cx="33" cy="29" r="2.5" fill="#1a1a1a" />
-              <circle cx="47" cy="29" r="2.5" fill="#1a1a1a" />
-              <circle cx="34" cy="28" r="0.8" fill="#fff" />
-              <circle cx="48" cy="28" r="0.8" fill="#fff" />
-            </>
-          ) : state === "thinking" ? (
-            <>
-              <line x1="30" y1="29" x2="36" y2="29" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-              <line x1="44" y1="29" x2="50" y2="29" stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />
-            </>
-          ) : state === "checkpoint" ? (
-            <>
-              <circle cx="33" cy="29" r="3.5" fill="#ffa500" />
-              <circle cx="47" cy="29" r="3.5" fill="#ffa500" />
-              <circle cx="33" cy="29" r="1.5" fill="#1a1a1a" />
-              <circle cx="47" cy="29" r="1.5" fill="#1a1a1a" />
-            </>
-          ) : state === "complete" ? (
-            <>
-              <path d="M30 28 Q33 25 36 28" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-              <path d="M44 28 Q47 25 50 28" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-            </>
+          {isSitting ? (
+            /* ── SITTING POSE ── */
+            <g>
+              {/* Ears */}
+              <circle cx="38" cy="14" r="5" />
+              <circle cx="52" cy="14" r="5" />
+              {/* Head */}
+              <ellipse cx="45" cy="22" rx="12" ry="10" />
+              {/* Eye */}
+              <circle cx="49" cy="20" r="1.5" className="fill-bb-black" />
+              {/* Snout */}
+              <ellipse cx="53" cy="24" rx="5" ry="3.5" className="fill-bb-orange" />
+              <circle cx="55" cy="23" r="1.2" className="fill-bb-black" />
+              {/* Body — hunched, sitting */}
+              <ellipse cx="45" cy="42" rx="18" ry="14" />
+              {/* Hump */}
+              <ellipse cx="38" cy="30" rx="10" ry="7" />
+              {/* Front legs (tucked) */}
+              <rect x="32" y="50" width="7" height="12" rx="3" />
+              <rect x="42" y="50" width="7" height="12" rx="3" />
+              {/* Hind leg (folded under) */}
+              <ellipse cx="58" cy="52" rx="10" ry="6" />
+              {/* Paws */}
+              <ellipse cx="35" cy="62" rx="5" ry="3" />
+              <ellipse cx="45" cy="62" rx="5" ry="3" />
+              {/* Tail */}
+              <circle cx="66" cy="44" r="4" />
+            </g>
           ) : (
-            <>
-              {/* Closed eyes, looking down in shame */}
-              <path d="M30 30 Q33 32 36 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round" />
-              <path d="M44 30 Q47 32 50 30" stroke="#1a1a1a" strokeWidth="2" fill="none" strokeLinecap="round" />
-              {/* Sad eyebrows */}
-              <line x1="29" y1="25" x2="35" y2="27" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
-              <line x1="51" y1="25" x2="45" y2="27" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
-            </>
+            /* ── WALKING/RUNNING POSE ── */
+            <g>
+              {/* Ears */}
+              <circle cx="68" cy="10" r="5" />
+              <circle cx="80" cy="10" r="5" />
+              {/* Head */}
+              <ellipse cx="75" cy="18" rx="12" ry="10" />
+              {/* Eye */}
+              <circle cx="80" cy="16" r="1.5" className="fill-bb-black" />
+              {/* Snout */}
+              <ellipse cx="85" cy="20" rx="5" ry="3.5" className="fill-bb-orange" />
+              <circle cx="88" cy="19" r="1.2" className="fill-bb-black" />
+              {/* Body */}
+              <ellipse cx="52" cy="30" rx="26" ry="13" />
+              {/* Shoulder hump */}
+              <ellipse cx="65" cy="22" rx="10" ry="8" />
+              {/* Front legs (stride) */}
+              <rect
+                x="62" y="38" width="6" height="20" rx="3"
+                className={isRunning ? "origin-top animate-[legSwing_0.6s_ease-in-out_infinite]" : ""}
+              />
+              <rect
+                x="70" y="38" width="6" height="20" rx="3"
+                className={isRunning ? "origin-top animate-[legSwingAlt_0.6s_ease-in-out_infinite]" : ""}
+              />
+              {/* Hind legs (stride) */}
+              <rect
+                x="32" y="36" width="6" height="22" rx="3"
+                className={isRunning ? "origin-top animate-[legSwingAlt_0.6s_ease-in-out_infinite]" : ""}
+              />
+              <rect
+                x="40" y="36" width="6" height="22" rx="3"
+                className={isRunning ? "origin-top animate-[legSwing_0.6s_ease-in-out_infinite]" : ""}
+              />
+              {/* Paws */}
+              <ellipse cx="65" cy="58" rx="5" ry="3" />
+              <ellipse cx="73" cy="58" rx="5" ry="3" />
+              <ellipse cx="35" cy="58" rx="5" ry="3" />
+              <ellipse cx="43" cy="58" rx="5" ry="3" />
+              {/* Tail */}
+              <circle cx="26" cy="28" r="4" />
+            </g>
           )}
 
-          {/* Nose */}
-          <ellipse cx="40" cy="36" rx="3.5" ry="2.5" fill="#1a1a1a" />
-          <ellipse cx="39" cy="35.5" rx="1.2" ry="0.8" fill="#444" opacity="0.5" />
-
-          {/* Mouth */}
-          {state === "complete" ? (
-            <path d="M35 41 Q40 46 45 41" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          ) : state === "error" ? (
-            <path d="M35 43 Q40 40 45 43" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          ) : (
-            <>
-              <path d="M40 38.5 L37.5 41" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              <path d="M40 38.5 L42.5 41" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            </>
+          {/* Star (California flag homage) — shown on complete */}
+          {state === "complete" && (
+            <polygon
+              points="10,18 12.5,12 15,18 9,14.5 16,14.5"
+              className="fill-bb-green"
+            />
           )}
         </svg>
-
-        {/* Thinking indicator */}
-        {state === "thinking" && (
-          <div className="absolute -top-2 -right-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-bb-amber opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-bb-amber" />
-            </span>
-          </div>
-        )}
       </div>
 
       <span className="text-xs text-bb-white font-mono">
@@ -126,6 +118,22 @@ export function BearMascot({ state, size = 64 }: BearMascotProps) {
         {state === "complete" && "COMPLETE"}
         {state === "error" && "ERROR"}
       </span>
+
+      {/* Keyframe styles for leg animation */}
+      <style>{`
+        @keyframes legSwing {
+          0%, 100% { transform: rotate(-15deg); }
+          50% { transform: rotate(15deg); }
+        }
+        @keyframes legSwingAlt {
+          0%, 100% { transform: rotate(15deg); }
+          50% { transform: rotate(-15deg); }
+        }
+        @keyframes walk {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 }
