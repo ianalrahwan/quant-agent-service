@@ -182,6 +182,8 @@ export default function TickerDetailPage({
                 onStart={handleStartAnalysis}
                 onResume={resumeCheckpoint}
                 onReset={reset}
+                chain={chain ?? null}
+                spotPrice={spotPrice}
               />
             </Panel>
           </div>

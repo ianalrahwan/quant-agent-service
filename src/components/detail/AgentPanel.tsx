@@ -1,6 +1,7 @@
 "use client";
 
 import type { AgentAnalysisState, BearState } from "@/lib/agent-types";
+import type { OptionsChainData } from "@/lib/types";
 import { AgentLog } from "./AgentLog";
 import { BearMascot } from "./BearMascot";
 import { PhasePipeline } from "./PhasePipeline";
@@ -20,6 +21,8 @@ interface AgentPanelProps {
   onStart: () => void;
   onResume: () => void;
   onReset: () => void;
+  chain: OptionsChainData | null;
+  spotPrice: number;
 }
 
 export function AgentPanel({
@@ -28,6 +31,8 @@ export function AgentPanel({
   onStart,
   onResume,
   onReset,
+  chain,
+  spotPrice,
 }: AgentPanelProps) {
   return (
     <div className="border border-bb-gray bg-bb-black p-4 font-mono">
@@ -117,7 +122,7 @@ export function AgentPanel({
       {state.tradeRecs.length > 0 && (
         <div className="mb-3">
           <div className="text-xs text-bb-gray mb-1">TRADE RECOMMENDATIONS</div>
-          <TradeRecCards recs={state.tradeRecs} />
+          <TradeRecCards recs={state.tradeRecs} chain={chain} spotPrice={spotPrice} />
         </div>
       )}
 
