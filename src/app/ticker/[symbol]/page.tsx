@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { HeaderBar } from "@/components/bloomberg/HeaderBar";
@@ -20,9 +20,10 @@ import type {
   QuoteData,
   OptionsChainData,
   VixTermStructure,
-  ScanResult,
   HistoricalBar,
+  CriterionResult,
 } from "@/lib/types";
+import { signalFromScore } from "@/lib/types";
 import type { ScannerSignals } from "@/lib/agent-types";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -40,7 +41,22 @@ export default function TickerDetailPage({
   const { data: chain } = useSWR<OptionsChainData>(`/api/options/${symbol}`, fetcher);
   const { data: history } = useSWR<HistoricalBar[]>(`/api/historical/${symbol}`, fetcher);
   const { data: vixData } = useSWR<VixTermStructure>("/api/vix", fetcher);
-  const { data: scanResults } = useSWR<ScanResult[]>("/api/scanner", fetcher, {
+  interface BackendScannerResult {
+    symbol: string;
+    scores: {
+      iv_percentile: number;
+      skew_kurtosis: number;
+      dealer_gamma: number;
+      term_structure: number;
+      vanna: number;
+      charm: number;
+      composite: number;
+    };
+    composite: number;
+    created_at: string;
+  }
+
+  const { data: rawScanResults } = useSWR<BackendScannerResult[]>("/api/scanner", fetcher, {
     revalidateOnFocus: false,
   });
   const { data: macroData } = useSWR<Record<string, HistoricalBar[]>>(
@@ -49,7 +65,32 @@ export default function TickerDetailPage({
     { revalidateOnFocus: false }
   );
 
-  const scanResult = scanResults?.find((r) => r.symbol === symbol);
+  const rawScanResult = rawScanResults?.find((r) => r.symbol === symbol);
+
+  function criterion(score: number): CriterionResult {
+    return {
+      score,
+      rawValue: score,
+      label: score >= 0.75 ? "Elevated" : score >= 0.5 ? "Moderate" : score >= 0.25 ? "Low" : "Flat",
+      signal: signalFromScore(score),
+    };
+  }
+
+  const scanResult = useMemo(() => {
+    if (!rawScanResult) return undefined;
+    return {
+      compositeScore: rawScanResult.composite,
+      criteria: {
+        ivPercentile: criterion(rawScanResult.scores.iv_percentile),
+        skewKurtosis: criterion(rawScanResult.scores.skew_kurtosis),
+        dealerGamma: criterion(rawScanResult.scores.dealer_gamma),
+        termStructure: criterion(rawScanResult.scores.term_structure),
+        vanna: criterion(rawScanResult.scores.vanna),
+        charm: criterion(rawScanResult.scores.charm),
+      },
+      timestamp: new Date(rawScanResult.created_at).getTime(),
+    };
+  }, [rawScanResult]);
 
   const { state: agentState, bearState, startAnalysis, resumeCheckpoint, reset, loadCached } = useAgentAnalysis();
 
@@ -58,18 +99,18 @@ export default function TickerDetailPage({
   }, [symbol, loadCached]);
 
   const handleStartAnalysis = useCallback(() => {
-    if (!scanResult) return;
+    if (!rawScanResult) return;
     const signals: ScannerSignals = {
-      iv_percentile: scanResult.criteria.ivPercentile?.score ?? 0,
-      skew_kurtosis: scanResult.criteria.skewKurtosis?.score ?? 0,
-      dealer_gamma: scanResult.criteria.dealerGamma?.score ?? 0,
-      term_structure: scanResult.criteria.termStructure?.score ?? 0,
-      vanna: scanResult.criteria.vanna?.score ?? 0,
-      charm: scanResult.criteria.charm?.score ?? 0,
-      composite: scanResult.compositeScore ?? 0,
+      iv_percentile: rawScanResult.scores.iv_percentile,
+      skew_kurtosis: rawScanResult.scores.skew_kurtosis,
+      dealer_gamma: rawScanResult.scores.dealer_gamma,
+      term_structure: rawScanResult.scores.term_structure,
+      vanna: rawScanResult.scores.vanna,
+      charm: rawScanResult.scores.charm,
+      composite: rawScanResult.composite,
     };
     startAnalysis(symbol, { scanner_signals: signals });
-  }, [scanResult, symbol, startAnalysis]);
+  }, [rawScanResult, symbol, startAnalysis]);
 
   const navigateToDetail = useCallback(
     (sym: string) => router.push(`/ticker/${sym}`),
