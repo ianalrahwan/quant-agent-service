@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DisclaimerModal } from "@/components/DisclaimerModal";
 
 export const metadata: Metadata = {
   title: "BEAR-SWAN BROWSER TERMINAL",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="h-full flex flex-col font-mono">{children}</body>
+      <body className="h-full flex flex-col font-mono">
+        {children}
+        <DisclaimerModal />
+      </body>
     </html>
   );
 }
