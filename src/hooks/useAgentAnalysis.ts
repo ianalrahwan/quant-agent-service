@@ -170,6 +170,7 @@ export function useAgentAnalysis() {
               ...prev,
               tradeRecs: data.trade_recs,
               narrativeTokens: prev.narrativeTokens || data.narrative,
+              tier: data.tier,
             }));
           }
         } catch {
@@ -217,6 +218,16 @@ export function useAgentAnalysis() {
           body: JSON.stringify(request),
           signal: ac.signal,
         });
+
+        if (resp.status === 429) {
+          const body = await resp.json().catch(() => ({}));
+          setState((s) => ({
+            ...s,
+            status: "error",
+            error: body.detail ?? "Free tier rate limit reached. Try again later or use the password.",
+          }));
+          return;
+        }
 
         if (!resp.ok) throw new Error(`Analysis request failed: ${resp.status}`);
 
@@ -287,6 +298,7 @@ export function useAgentAnalysis() {
         totalTime: data.total_time,
         logs: data.phases_log,
         cachedAt: data.created_at,
+        tier: data.tier,
       });
     } catch {
       // No cache available — stay idle
