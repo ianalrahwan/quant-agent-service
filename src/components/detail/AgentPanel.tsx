@@ -6,6 +6,7 @@ import { AgentLog } from "./AgentLog";
 import { BearMascot } from "./BearMascot";
 import { PhasePipeline } from "./PhasePipeline";
 import { TradeRecCards } from "./TradeRecCards";
+import { TradeRecUpsell } from "./TradeRecUpsell";
 
 function timeAgo(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -118,12 +119,20 @@ export function AgentPanel({
         </div>
       )}
 
-      {/* Trade recommendations */}
-      {state.tradeRecs.length > 0 && (
-        <div className="mb-3">
-          <div className="text-xs text-bb-gray mb-1">TRADE RECOMMENDATIONS</div>
-          <TradeRecCards recs={state.tradeRecs} chain={chain} spotPrice={spotPrice} />
-        </div>
+      {/* Trade recommendations — pro cards or free upsell */}
+      {state.status === "complete" && state.tier !== undefined && (
+        state.tier === "pro" ? (
+          state.tradeRecs.length > 0 && (
+            <div className="mb-3">
+              <div className="text-xs text-bb-gray mb-1">TRADE RECOMMENDATIONS</div>
+              <TradeRecCards recs={state.tradeRecs} chain={chain} spotPrice={spotPrice} />
+            </div>
+          )
+        ) : (
+          <div className="mb-3">
+            <TradeRecUpsell />
+          </div>
+        )
       )}
 
       {/* Error */}
