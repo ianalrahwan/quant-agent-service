@@ -1,5 +1,7 @@
 // Backend API types for agent workflow
 
+export type Tier = "free" | "pro";
+
 export interface ScannerSignals {
   iv_percentile: number;
   skew_kurtosis: number;
@@ -123,6 +125,7 @@ export interface CachedAnalysis {
   phases_log: string[];
   total_time: number;
   created_at: string;
+  tier?: Tier;
 }
 
 export interface AgentAnalysisState {
@@ -137,4 +140,5 @@ export interface AgentAnalysisState {
   totalTime: number | null;
   logs: string[];
   cachedAt: string | null;
+  tier?: Tier;
 }
