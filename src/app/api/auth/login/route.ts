@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
+import { COOKIE_NAME } from "@/lib/pro-cookie";
 
-const COOKIE_NAME = "agent_pro";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 function timingSafeEqualStr(a: string, b: string): boolean {

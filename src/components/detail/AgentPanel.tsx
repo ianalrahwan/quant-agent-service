@@ -120,7 +120,7 @@ export function AgentPanel({
       )}
 
       {/* Trade recommendations — pro cards or free upsell */}
-      {state.status === "complete" && (
+      {state.status === "complete" && state.tier !== undefined && (
         state.tier === "pro" ? (
           state.tradeRecs.length > 0 && (
             <div className="mb-3">
